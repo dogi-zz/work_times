@@ -1,18 +1,27 @@
-import {Component} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
-import {HomeModule} from './home/home.module';
-import {HashLocationStrategy, LocationStrategy} from '@angular/common';
+import {Component, ElementRef, TemplateRef, ViewChild} from '@angular/core';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [
-    RouterOutlet,
-    HomeModule
-  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.less'
 })
 export class AppComponent {
-  title = 'work_times';
+
+  @ViewChild('modal') private modal: ElementRef<HTMLElement>;
+
+  public modalOpen = false;
+  public modalContent: TemplateRef<ElementRef<HTMLElement>>;
+
+  constructor() {
+
+  }
+
+  public openModal(content: TemplateRef<ElementRef<HTMLElement>>) {
+    this.modalOpen = true;
+    this.modalContent = content;
+  }
+
+  public closeModal() {
+    this.modalOpen = false;
+  }
 }

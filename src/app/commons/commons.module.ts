@@ -2,6 +2,7 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {MonthToStringPipe} from './month-to-string.pipe';
+import {ShiftCodeService} from '../services/shift-code-service';
 
 
 @NgModule({
@@ -18,6 +19,10 @@ import {MonthToStringPipe} from './month-to-string.pipe';
 
     MonthToStringPipe,
   ],
+  providers: [
+    ShiftCodeService,
+  ]
+
 })
 export class CommonsModule {
 }

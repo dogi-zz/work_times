@@ -1,9 +1,24 @@
-@color-active: #dd42f6;
-@color-active-bg: lighten(@color-active, 55%);
+@color-active: #238305;
+@color-active-bg: lighten(@color-active, 70%);
 
 .typo-big() {
   font-size: 18px;
   font-weight: bold;
+}
+
+.typo-regular-big() {
+  font-size: 16px;
+  font-weight: normal;
+}
+
+.typo-regular() {
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.typo-small() {
+  font-size: 12px;
+  font-weight: normal;
 }
 
 .flex-center() {
@@ -17,12 +32,16 @@
   .flex-center();
   padding: 5px;
   font-size: 18px;
-  background: @color-active-bg;
   border: 1px solid @color-active;
   border-radius: 10px;
   color: @color-active;
-  box-shadow: 2px 2px 2px #8001c6;
+  box-shadow: 2px 2px 2px @color-active;
   cursor: pointer;
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 }
 
 body {
@@ -35,7 +54,40 @@ h1 {
   margin: 10px 20px;
   padding: 0;
   color: @color-active;
+  display: flex;
+  align-items: center;
+
+  span {
+    flex: 1;
+  }
+
+  .button {
+    background-color: @color-active;
+    color: white;
+  }
 }
+
+h2 {
+  margin: 10px 20px;
+  padding: 0;
+  color: @color-active;
+}
+
+input[type="text"] {
+  outline: none !important;
+  border: 1px solid darken(@color-active, 10%);
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 5px;
+}
+
+input[type="number"] {
+  outline: none !important;
+  border: 1px solid darken(@color-active, 10%);
+  font-size: 18px;
+  border-radius: 5px;
+}
+
 
 .month-input {
   margin: 20px;
@@ -44,8 +96,195 @@ h1 {
   display: flex;
   align-items: center;
 
-  .text{
+  .text {
     .typo-big();
     margin: 0 20px;
+  }
+}
+
+
+.day-time-inputs {
+  margin: 20px;
+
+
+}
+
+
+.day-time-input-line {
+  .typo-regular();
+
+  &:not(:last-child) {
+    border-bottom: 1px solid @color-active;
+  }
+
+  display: flex;
+  align-items: center;
+
+  .day {
+    .typo-regular-big();
+    margin: 5px 10px;
+  }
+
+  input {
+    width: 60px;
+    margin: 5px;
+  }
+
+  .output-strings {
+    margin-left: 10px;
+    flex: 1;
+
+    span {
+      margin-left: 10px;
+      .typo-small();
+    }
+  }
+
+  .output-chart {
+    display: none;
+    width: 50%;
+    align-self: stretch;
+    position: relative;
+
+    .output-chart-item {
+      position: absolute;
+      border: 1px solid @color-active;
+      height: 6px;
+      top: calc(50% - 3px);
+      background-color: lighten(@color-active, 70%);
+      border-radius: 10px;
+    }
+  }
+
+}
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+  backdrop-filter: blur(2px);
+
+  &.open {
+    display: block;
+  }
+
+  /* Modal Content/Box */
+
+  .modal-content {
+
+    box-shadow: 4px 4px 5px rgba(0, 0, 0, 0.4);
+    width: 50vw;
+    //width: 500px;
+    min-width: 500px;
+
+    background-color: #fefefe;
+    margin: 15vh auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+  }
+
+  /* The Close Button */
+
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+}
+
+
+.shift-enter {
+  margin: 20px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .spacer {
+    flex: 1;
+  }
+
+  input {
+    width: 50px;
+    text-align: right;
+  }
+}
+
+.error {
+  color: red;
+}
+
+
+.config-settings {
+  height: calc(70vh - 50px);
+  overflow-y: auto;
+
+  .delete-item {
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
+    padding: 5px 10px;
+
+    &:hover {
+      background: @color-active-bg;
+    }
+
+    .name {
+      width: 100px;
+      font-weight: bold;
+      color: darken(@color-active, 10%);
+    }
+
+    .info {
+      flex: 1;
+    }
+
+    .material-symbols-outlined {
+      cursor: pointer;
+    }
+  }
+}
+
+
+@media print {
+  .button, input {
+    display: none;
+  }
+
+  .month-input .text {
+    margin: 0;
+  }
+
+
+  .day-time-input-line {
+    &:nth-child(even) {
+      background: #eeeeee;
+    }
+
+    .output-chart {
+      display: block;
+    }
+
+    &:not(:last-child) {
+      border-bottom: none;
+    }
+
+    .day {
+      .typo-regular();
+    }
   }
 }
