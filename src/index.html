@@ -6,6 +6,12 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <script type="text/javascript">
+    const baseHref = document.querySelector('base').attributes['href'].value;
+    document.write(`<link href="${baseHref}material-icons/material.css" rel="stylesheet">`);
+  </script>
+
 </head>
 <body>
   <app-root></app-root>

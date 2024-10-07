@@ -1,8 +1,28 @@
-@color-active: #8001C6;
+@color-active: #dd42f6;
+@color-active-bg: lighten(@color-active, 55%);
 
 .typo-big() {
   font-size: 18px;
   font-weight: bold;
+}
+
+.flex-center() {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.button {
+  .flex-center();
+  padding: 5px;
+  font-size: 18px;
+  background: @color-active-bg;
+  border: 1px solid @color-active;
+  border-radius: 10px;
+  color: @color-active;
+  box-shadow: 2px 2px 2px #8001c6;
+  cursor: pointer;
 }
 
 body {
@@ -12,13 +32,20 @@ body {
 }
 
 h1 {
-  margin: 10px;
+  margin: 10px 20px;
   padding: 0;
   color: @color-active;
 }
 
 .month-input {
   margin: 20px;
-  .typo-big();
+  color: darken(@color-active, 10%);
+
   display: flex;
+  align-items: center;
+
+  .text{
+    .typo-big();
+    margin: 0 20px;
+  }
 }

@@ -6,7 +6,9 @@ import {getNextMonth, Month} from '../tools/date.tools';
   template: `
       <h1>Arbeitszeiten</h1>
       <div class="month-input">
-          {{month|monthToString}}
+        <div class="button"><span class="material-symbols-outlined">chevron_left</span></div>
+        <div class="text">{{month|monthToString}}</div>
+        <div class="button"><span class="material-symbols-outlined">chevron_right</span></div>
       </div>
   `,
 })
