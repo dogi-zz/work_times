@@ -7,7 +7,7 @@
     "build": "ng build --base-href=/work_times/",
     "preview:pre": "if [ -d 'docs' ]; then rm -rf docs; fi",
     "preview:post": "cp -a dist/work_times/browser docs",
-    "preview": "npm run preview:pre && ng build --base-href /misc.angular-stuff/ && npm run preview:post"
+    "preview": "npm run preview:pre && ng build --base-href /work_times/ && npm run preview:post"
   },
   "private": true,
   "dependencies": {
