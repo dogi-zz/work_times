@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {Month} from '../tools/date.tools';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
+import {Subject} from 'rxjs';
 
 const SHIFT_CODE_KEY = 'SHIFT_CODE';
 const SHIFT_COMBINATIONS = 'SHIFT_COMBINATIONS';
@@ -39,6 +40,8 @@ export class DataService {
 
   public jsonBinIoAccessKey = null;
   public jsonBinIoBinId = null;
+
+  public loadData = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
@@ -85,8 +88,15 @@ export class DataService {
       const headers = {
         'X-Access-Key': this.jsonBinIoAccessKey
       }
-      this.http.get(`https://api.jsonbin.io/v3/b/${this.jsonBinIoBinId}`, {headers}).toPromise().then(data => {
+      this.http.get(`https://api.jsonbin.io/v3/b/${this.jsonBinIoBinId}`, {headers}).toPromise().then((data: any) => {
         console.info(data)
+        const {shiftEntries, shiftCombinations, allData} = data.record;
+        if (shiftEntries&& shiftCombinations&& allData){
+          this.shiftEntries = shiftEntries;
+          this.shiftCombinations = shiftCombinations;
+          this.allData = allData;
+          this.loadData.next()
+        }
       })
     }
   }

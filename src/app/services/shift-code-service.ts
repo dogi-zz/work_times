@@ -19,9 +19,11 @@ export class ShiftCodeService {
     console.info(this);
     this.allShifts.next(this.dataService.getLocalShiftEntries())
     this.allShiftCombinations.next(this.dataService.getLocalShiftCombinations());
-    // this.allShifts.value.forEach(shift => {
-    //   shift.shiftString = `${pad2(shift.fromTime[0])}:${pad2(shift.fromTime[1])}-${pad2(shift.toTime[0])}:${pad2(shift.toTime[1])}`;
-    // })
+
+    this.dataService.loadData.subscribe(()=>{
+      this.allShifts.next(this.dataService.getLocalShiftEntries())
+      this.allShiftCombinations.next(this.dataService.getLocalShiftCombinations());
+    });
     this.checkShiftCombinations();
   }
 
@@ -34,6 +36,15 @@ export class ShiftCodeService {
         return null;
       }
     }))
+  }
+
+  public getShiftStringSync(shiftCode: string): string {
+    const shift = this.allShifts.value.find(s => s.shiftCode === shiftCode);
+    if (shift) {
+      return `${pad2(shift.fromTime[0])}:${pad2(shift.fromTime[1])}-${pad2(shift.toTime[0])}:${pad2(shift.toTime[1])}`;
+    } else {
+      return null;
+    }
   }
 
   public hasShiftString(shiftCode: string): boolean {

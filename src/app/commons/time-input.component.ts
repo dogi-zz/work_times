@@ -77,7 +77,6 @@ export class TimeInputComponent implements OnChanges, AfterViewInit {
 
 
   constructor() {
-    console.info(this)
   }
 
   ngOnChanges(changes: SimpleChanges) {

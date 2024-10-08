@@ -31,6 +31,16 @@ h2 {
   padding: 0;
 }
 
+a, .a{
+  cursor: pointer;
+  font-weight: bold;
+  color: @color-active;
+  text-decoration: none;
+  &:hover, &:visited{
+    color: @color-active;
+  }
+}
+
 .button, button {
   .button();
 }

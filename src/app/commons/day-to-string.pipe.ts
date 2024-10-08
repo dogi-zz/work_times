@@ -18,7 +18,7 @@ export class DayToStringPipe implements PipeTransform {
     if (type === 'date'){
       return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}`;
     } else if (type === 'week'){
-      return dayNames[date.getDay()];
+      return `${dayNames[date.getDay()]},`;
     } else if (type === 'weekend'){
       return (date.getDay() === 0 || date.getDay() === 6)  ;
     } else {

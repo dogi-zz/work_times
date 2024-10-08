@@ -5,6 +5,7 @@ import {MonthToStringPipe} from './month-to-string.pipe';
 import {ModalPanelComponent} from './modal-panel.component';
 import {TimeInputComponent} from './time-input.component';
 import {DayToStringPipe} from './day-to-string.pipe';
+import {ShiftInputComponent} from './shift-input.component';
 
 
 @NgModule({
@@ -18,6 +19,7 @@ import {DayToStringPipe} from './day-to-string.pipe';
 
     ModalPanelComponent,
     TimeInputComponent,
+    ShiftInputComponent,
   ],
   exports: [
     CommonModule,
@@ -28,6 +30,7 @@ import {DayToStringPipe} from './day-to-string.pipe';
 
     ModalPanelComponent,
     TimeInputComponent,
+    ShiftInputComponent,
   ],
   providers: []
 

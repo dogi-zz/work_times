@@ -1,16 +1,18 @@
-import {Component, ElementRef, OnInit, QueryList, TemplateRef, ViewChild, ViewChildren} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, QueryList, TemplateRef, ViewChild, ViewChildren} from '@angular/core';
 import {addMonth, getDaysOfMonth, getNextMonth, Month} from '../tools/date.tools';
 import {ShiftCodeService} from '../services/shift-code-service';
 import {AppComponent} from '../app.component';
 import {Subscription} from 'rxjs';
 import {DataService} from '../services/data-service';
+import {PdfService} from '../services/pdf.service';
+import {ShiftInputComponent} from '../commons/shift-input.component';
 
 
 interface DayEntry {
   day: number;
   shiftCode: string;
   shifts: string[];
-  shiftEntryCharts: { left: string, width: string }[];
+  shiftEntryCharts: { from: number, to: number, left: string, width: string }[];
 }
 
 @Component({
@@ -19,7 +21,9 @@ interface DayEntry {
 
     <h1>
       <span>Arbeitszeiten</span>
-      <div class="button" (click)="uploadData($event)" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">upload</span></div>
+      <div class="button" (click)="exportPdf()"><span class="material-symbols-outlined">picture_as_pdf</span><span class="label">Drucken</span></div>
+      <div class="button" (click)="uploadData()" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">upload</span></div>
+      <div class="button" (click)="downloadData()" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">download</span></div>
       <div class="button" (click)="openConfigSettings()"><span class="material-symbols-outlined">settings</span></div>
     </h1>
     <div class="month-input">
@@ -29,11 +33,11 @@ interface DayEntry {
     </div>
 
     <div class="day-time-inputs">
-      <div class="day-time-input-line" *ngFor="let day of dayEntries" [class.weekend]="(day.day | dayToString : month : 'weekend')">
+      <div class="day-time-input-line" *ngFor="let day of dayEntries; let idx = index" [class.weekend]="(day.day | dayToString : month : 'weekend')">
         <div class="week">{{ day.day | dayToString : month : 'week' }}</div>
         <div class="day">{{ day.day | dayToString : month : 'date' }}</div>
         <div class="input">
-          <input type="text" #dayInput list="shiftCombinations" [(ngModel)]="day.shiftCode" (keydown.enter)="onEnter($event)" (blur)="onBlur(day)"/>
+          <app-shift-input #dayInput [(shiftCode)]="day.shiftCode" (shiftCodeChange)="applyValue(day)" (enterPressed)="onEnter(idx)"></app-shift-input>
         </div>
         <div class="output-strings">
           <app-shift *ngFor="let shift of day.shifts" [shiftCode]="shift"></app-shift>
@@ -44,24 +48,30 @@ interface DayEntry {
       </div>
     </div>
 
-    <datalist id="shiftCombinations">
-      <option *ngFor="let shift of shiftCodeService.allShiftCombinations|async" [value]="shift"></option>
-    </datalist>
-
 
     <ng-template #inputShift>
       <app-input-shift (onTimeSet)="saveShiftTime($event)"></app-input-shift>
     </ng-template>
 
     <ng-template #configSettings>
-      <app-config-data></app-config-data>
+      <div class="config-settings">
+        <app-config-data></app-config-data>
+        <app-config-json-bin></app-config-json-bin>
+      </div>
     </ng-template>
-
   `,
-})
-export class HomeComponent implements OnInit {
+  styles: [`
+    @import (reference) "../../styles/commons";
 
-  @ViewChildren('dayInput') private dayInput: QueryList<ElementRef<HTMLInputElement>>;
+    .config-settings {
+      height: calc(70vh - 50px);
+      overflow-y: auto;
+    }
+  `]
+})
+export class HomeComponent implements OnInit, OnDestroy {
+
+  @ViewChildren('dayInput') private dayInput: QueryList<ShiftInputComponent>;
 
   @ViewChild('inputShift') private inputShift: TemplateRef<ElementRef<HTMLElement>>;
   @ViewChild('configSettings') private configSettings: TemplateRef<ElementRef<HTMLElement>>;
@@ -75,9 +85,11 @@ export class HomeComponent implements OnInit {
   private newShiftRes: () => void;
 
   private checkEntrySubscription: Subscription;
+  private loadSubscription: Subscription;
 
   constructor(
     private appComponent: AppComponent,
+    private pdfService: PdfService,
     public shiftCodeService: ShiftCodeService,
     public dataService: DataService,
   ) {
@@ -107,6 +119,12 @@ export class HomeComponent implements OnInit {
     this.checkEntrySubscription = this.shiftCodeService.allShifts.subscribe(() => {
       this.checkEntries();
     })
+    this.loadSubscription = this.dataService.loadData.subscribe(()=>this.load());
+  }
+
+  ngOnDestroy() {
+    this.loadSubscription.unsubscribe();
+    this.checkEntrySubscription.unsubscribe();
   }
 
   public addMonth(amount: number) {
@@ -141,21 +159,19 @@ export class HomeComponent implements OnInit {
       times[idx].forEach(([fromTime, toTime]) => {
         const fromRatio = (fromTime - min) / ratio;
         const toRatio = (toTime - min) / ratio;
-        dayEntry.shiftEntryCharts.push({left: `${fromRatio * 100}%`, width: `${(toRatio - fromRatio) * 100}%`})
+        dayEntry.shiftEntryCharts.push({from: fromTime, to: toTime, left: `${fromRatio * 100}%`, width: `${(toRatio - fromRatio) * 100}%`})
       })
     })
 
   }
 
-  onEnter($event: any) {
-    const input = $event.target as HTMLInputElement;
-    const idx = this.dayInput.toArray().findIndex(di => di.nativeElement === input);
+  onEnter(idx: number) {
     if (idx + 1 < this.dayInput.length) {
-      this.dayInput.get(idx + 1).nativeElement.focus();
+      this.dayInput.get(idx + 1).dayInput.nativeElement.focus();
     }
   }
 
-  async onBlur(day: DayEntry) {
+  async applyValue(day: DayEntry) {
     const {shifts, unknown} = this.shiftCodeService.getShiftCodes(day.shiftCode);
     day.shifts = [...shifts, ...unknown];
     for (const newShiftCode of unknown) {
@@ -188,15 +204,28 @@ export class HomeComponent implements OnInit {
 
   openConfigSettings() {
     this.appComponent.modalPanel.openModal('Schichten verwalten', this.configSettings).then(() => {
-      console.info("HIER")
+
     })
   }
 
 
-  uploadData($event: MouseEvent) {
-    if ($event.ctrlKey){
-      this.dataService.exportLink();
+  uploadData() {
+    if (confirm('Daten auf den Server hochladen?')) {
+      this.dataService.saveToBin();
     }
-    this.dataService.saveToBin();
+  }
+
+  downloadData() {
+    if (confirm('Lokale Daten überschreiben?')) {
+      this.dataService.loadFromBin();
+    }
+  }
+
+  public exportPdf() {
+    this.pdfService.exportPdf(this.month, this.dayEntries.map(d => ({
+      day: d.day,
+      shifts: d.shifts.map(s => this.shiftCodeService.getShiftStringSync(s) || s),
+      charts: d.shiftEntryCharts.map(c => ({from: c.from, to: c.to, left: parseFloat(c.left) / 100, width: parseFloat(c.width) / 100}))
+    })));
   }
 }
