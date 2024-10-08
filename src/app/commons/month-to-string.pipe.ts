@@ -11,6 +11,7 @@ export class MonthToStringPipe implements PipeTransform {
   constructor(
   ) {
   }
+
   public transform(value: Month): string {
     if ((value ?? null) === null) {
       return null;

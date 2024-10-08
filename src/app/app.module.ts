@@ -7,6 +7,7 @@ import {HomeModule} from './home/home.module';
 import {RouterModule} from '@angular/router';
 import {routes} from './app.routes';
 import {HashLocationStrategy, LocationStrategy} from '@angular/common';
+import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 
 @NgModule({
   imports: [
@@ -21,7 +22,10 @@ import {HashLocationStrategy, LocationStrategy} from '@angular/common';
   declarations: [
     AppComponent,
   ],
-  providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
+  providers: [
+    {provide: LocationStrategy, useClass: HashLocationStrategy},
+    provideHttpClient(withInterceptorsFromDi())
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {

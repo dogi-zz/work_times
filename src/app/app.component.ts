@@ -1,4 +1,6 @@
-import {Component, ElementRef, TemplateRef, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
+import {ModalPanelComponent} from './commons/modal-panel.component';
+
 
 @Component({
   selector: 'app-root',
@@ -7,21 +9,11 @@ import {Component, ElementRef, TemplateRef, ViewChild} from '@angular/core';
 })
 export class AppComponent {
 
-  @ViewChild('modal') private modal: ElementRef<HTMLElement>;
+  @ViewChild('modalPanel') public modalPanel: ModalPanelComponent;
 
-  public modalOpen = false;
-  public modalContent: TemplateRef<ElementRef<HTMLElement>>;
 
   constructor() {
 
   }
 
-  public openModal(content: TemplateRef<ElementRef<HTMLElement>>) {
-    this.modalOpen = true;
-    this.modalContent = content;
-  }
-
-  public closeModal() {
-    this.modalOpen = false;
-  }
 }

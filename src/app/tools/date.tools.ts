@@ -32,3 +32,7 @@ export const getDaysOfMonth = (month: Month): number[] => {
   }
   return result;
 }
+
+export const getDayDate = (day: number, month: Month): Date => {
+  return new Date(month.year, month.month, day, 12);
+}

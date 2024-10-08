@@ -1,11 +1,4 @@
 
 <router-outlet />
 
-<div #modal class="modal" [class.open]="modalOpen">
-
-  <!-- Modal content -->
-  <div class="modal-content">
-    <ng-template [ngTemplateOutlet]="modalContent"></ng-template>
-  </div>
-
-</div>
+<app-modal-panel #modalPanel></app-modal-panel>
