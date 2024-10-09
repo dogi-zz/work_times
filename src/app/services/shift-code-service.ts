@@ -111,9 +111,10 @@ export class ShiftCodeService {
   }
 
   deleteShift(shift: ShiftEntry) {
-    // this.allShifts = this.allShifts.filter(s => s !== shift);
-    // this.checkShiftCombinations();
-    // window.localStorage.setItem(SHIFT_CODE_KEY, JSON.stringify(this.allShifts))
+    this.allShifts.next(this.allShifts.value.filter(s => s !== shift))
+    this.checkShiftCombinations();
+    this.dataService.saveShiftEntries(this.allShifts.value)
+    this.dataService.saveShiftCombinations(this.allShiftCombinations.value)
   }
 
   deleteShiftCombination(shiftCombination: string) {
