@@ -6,6 +6,7 @@ import {Subscription} from 'rxjs';
 import {DataService} from '../services/data-service';
 import {PdfService} from '../services/pdf.service';
 import {ShiftInputComponent} from '../commons/shift-input.component';
+import {ICalService} from '../services/i-cal.service';
 
 
 interface DayEntry {
@@ -21,6 +22,7 @@ interface DayEntry {
 
     <h1>
       <span>Arbeitszeiten</span>
+      <div class="button" (click)="exportICal()"><span class="material-symbols-outlined">event</span><span class="label">I-Cal</span></div>
       <div class="button" (click)="exportPdf()"><span class="material-symbols-outlined">picture_as_pdf</span><span class="label">Drucken</span></div>
       <div class="button" (click)="uploadData()" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">upload</span></div>
       <div class="button" (click)="downloadData()" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">download</span></div>
@@ -90,6 +92,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private appComponent: AppComponent,
     private pdfService: PdfService,
+    private iCalService: ICalService,
     public shiftCodeService: ShiftCodeService,
     public dataService: DataService,
   ) {
@@ -174,9 +177,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   async applyValue(day: DayEntry) {
     const {shifts, unknown} = this.shiftCodeService.getShiftCodes(day.shiftCode);
     day.shifts = [...shifts, ...unknown];
+    day.shiftCode = day.shifts.join(',')
     for (const newShiftCode of unknown) {
       await this.addShiftEntry(newShiftCode)
     }
+    this.shiftCodeService.addShiftCombination(day.shiftCode);
     this.checkEntries();
     this.save();
   }
@@ -226,6 +231,13 @@ export class HomeComponent implements OnInit, OnDestroy {
       day: d.day,
       shifts: d.shifts.map(s => this.shiftCodeService.getShiftStringSync(s) || s),
       charts: d.shiftEntryCharts.map(c => ({from: c.from, to: c.to, left: parseFloat(c.left) / 100, width: parseFloat(c.width) / 100}))
+    })));
+  }
+
+  public exportICal() {
+    this.iCalService.exportICal(this.month, this.dayEntries.map(d => ({
+      day: d.day,
+      times: d.shifts.map(s => this.shiftCodeService.getShiftTimes(s)),
     })));
   }
 }

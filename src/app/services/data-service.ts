@@ -91,11 +91,14 @@ export class DataService {
       this.http.get(`https://api.jsonbin.io/v3/b/${this.jsonBinIoBinId}`, {headers}).toPromise().then((data: any) => {
         console.info(data)
         const {shiftEntries, shiftCombinations, allData} = data.record;
-        if (shiftEntries&& shiftCombinations&& allData){
+        if (shiftEntries && shiftCombinations && allData) {
           this.shiftEntries = shiftEntries;
           this.shiftCombinations = shiftCombinations;
           this.allData = allData;
           this.loadData.next()
+          this.saveShiftEntries(this.shiftEntries);
+          this.saveShiftCombinations(this.shiftCombinations);
+          this.saveAllData();
         }
       })
     }
@@ -145,6 +148,10 @@ export class DataService {
   public saveLocalData(month: Month, data: { day: number, shiftCode: string }[]) {
     const key = `${month.year}-${month.month}`;
     this.allData[key] = data;
+    this.saveAllData();
+  }
+
+  private saveAllData() {
     window.localStorage.setItem(MONTH_ENTRY_CODE, JSON.stringify(this.allData));
   }
 

@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, map, Observable} from 'rxjs';
 import {DataService, ShiftEntry} from './data-service';
+import {splitShift} from '../tools/string-tools';
 
 const pad2 = (num: number) => num < 10 ? `0${num}` : `${num}`;
 
@@ -47,6 +48,15 @@ export class ShiftCodeService {
     }
   }
 
+  public getShiftTimes(shiftCode: string): {from: [number, number], to: [number, number]} {
+    const shift = this.allShifts.value.find(s => s.shiftCode === shiftCode);
+    if (shift) {
+      return {from: shift.fromTime, to: shift.toTime };
+    } else {
+      return null;
+    }
+  }
+
   public hasShiftString(shiftCode: string): boolean {
     return !!this.allShifts.value.find(s => s.shiftCode === shiftCode)
   }
@@ -57,7 +67,7 @@ export class ShiftCodeService {
     }
     const shifts: string[] = [];
     const unknown: string[] = [];
-    const parts = inputString.trim().toLowerCase().split(',');
+    const parts = splitShift(inputString);
     parts.forEach(shiftCode => {
       if (this.allShifts.value.find(s => s.shiftCode === shiftCode)) {
         shifts.push(shiftCode);
@@ -96,9 +106,11 @@ export class ShiftCodeService {
   }
 
   addShiftCombination(shiftCode: string) {
-    if (shiftCode.split(',').every(sc => this.allShifts.value.find(s => s.shiftCode === sc))) {
-      if (!this.allShiftCombinations.value.includes(shiftCode)) {
-        this.allShiftCombinations.next([...this.allShiftCombinations.value, shiftCode]);
+    const parts = splitShift(shiftCode);
+    if (parts.every(sc => this.allShifts.value.find(s => s.shiftCode === sc))) {
+      const combination = parts.join(',')
+      if (!this.allShiftCombinations.value.includes(combination)) {
+        this.allShiftCombinations.next([...this.allShiftCombinations.value, combination]);
         this.dataService.saveShiftCombinations(this.allShiftCombinations.value)
       }
     }
@@ -106,7 +118,7 @@ export class ShiftCodeService {
 
   private checkShiftCombinations() {
     this.allShiftCombinations.next(this.allShiftCombinations.value.filter(combination => {
-      return combination.split(',').every(sc => this.allShifts.value.find(s => s.shiftCode === sc))
+      return splitShift(combination).every(sc => this.allShifts.value.find(s => s.shiftCode === sc))
     }))
   }
 

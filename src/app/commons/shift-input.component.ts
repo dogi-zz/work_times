@@ -1,15 +1,16 @@
-import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {ShiftCodeService} from '../services/shift-code-service';
-import {map, Observable} from 'rxjs';
+import {Subscription} from 'rxjs';
+import {splitShift} from '../tools/string-tools';
 
 
 @Component({
   selector: 'app-shift-input',
   template: `
     <div class="shift-input">
-      <input type="text" #dayInput list="shiftCombinations" [(ngModel)]="shiftCode" (ngModelChange)="filter($event)" (keydown.enter)="onEnter()" (focus)="onFocus()" (blur)="onBlur()"/>
-      <div class="suggestions" *ngIf="suggestionsOpen">
-        <div class="suggestion" *ngFor="let suggestion of (suggestions|async)" (click)="applyValue(suggestion)">{{ suggestion }}</div>
+      <input type="text" #dayInput list="shiftCombinations" [(ngModel)]="shiftCode" (ngModelChange)="filter($event)" (keydown)="onKeyDown($event)" (focus)="onFocus()" (blur)="onBlur()"/>
+      <div class="suggestions" *ngIf="suggestionsOpen && actualSuggestions.length">
+        <div class="suggestion" *ngFor="let suggestion of actualSuggestions; let idx = index;" [class.hover]="suggestionIndex === idx" (click)="applyValue(suggestion)">{{ idx }}{{ suggestion }}</div>
       </div>
     </div>
   `,
@@ -25,7 +26,7 @@ import {map, Observable} from 'rxjs';
         position: absolute;
         left: 5px;
         top: 32px;
-        max-height: 50px;
+        max-height: 120px;
         min-width: 100px;
 
         border-radius: 5px;
@@ -40,7 +41,7 @@ import {map, Observable} from 'rxjs';
         padding: 5px 10px;
         cursor: pointer;
 
-        &:hover {
+        &:hover, &.hover {
           background: @color-hover-bg;
         }
       }
@@ -50,7 +51,7 @@ import {map, Observable} from 'rxjs';
   ]
 
 })
-export class ShiftInputComponent implements OnChanges {
+export class ShiftInputComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('dayInput') public dayInput: ElementRef<HTMLInputElement>;
 
   @Input() shiftCode: string = null;
@@ -59,47 +60,80 @@ export class ShiftInputComponent implements OnChanges {
   @Output() enterPressed = new EventEmitter<void>();
 
   public suggestionsOpen: boolean;
-  public suggestions: Observable<string[]>;
+  public suggestionsSubscription: Subscription;
 
+  public actualSuggestions: string[] = [];
+  public suggestionIndex = -1;
 
   constructor(
     public shiftCodeService: ShiftCodeService,
   ) {
   }
 
+  ngOnInit() {
+
+  }
+
   ngOnChanges(changes: SimpleChanges) {
 
   }
 
+  ngOnDestroy() {
+    this.suggestionsSubscription?.unsubscribe();
 
-  onEnter() {
-    this.dayInput.nativeElement.blur()
-    this.shiftCodeChange.next(this.shiftCode);
-    this.enterPressed.emit();
+  }
+
+
+  onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'ArrowDown') {
+      this.suggestionIndex = Math.min(this.suggestionIndex + 1, this.actualSuggestions.length - 1)
+    }
+    if (event.key === 'ArrowUp') {
+      this.suggestionIndex = Math.max(this.suggestionIndex - 1, 0)
+    }
+    if (event.key === 'Enter') {
+      if (this.suggestionIndex >= 0) {
+        this.shiftCode = this.actualSuggestions[this.suggestionIndex];
+      }
+      this.dayInput.nativeElement.blur()
+      this.shiftCodeChange.next(this.shiftCode);
+      this.enterPressed.emit();
+    }
+    if (event.key === 'Escape') {
+      this.dayInput.nativeElement.blur();
+    }
   }
 
   filter($event: string) {
-    console.info("filter", $event)
-    this.suggestions = this.shiftCodeService.allShiftCombinations.pipe(map(combinations => combinations.filter(shiftCode => {
-      const parts = $event.trim().toLowerCase().split(/[^a-z0-9]+/);
-      return parts.every(part => shiftCode.includes(part));
-    })));
+    this.suggestionIndex = -1;
+    this.suggestionsSubscription?.unsubscribe();
+    this.suggestionsSubscription = this.shiftCodeService.allShiftCombinations.subscribe(combinations => {
+      this.actualSuggestions = combinations.filter(shiftCode => {
+        const parts = splitShift($event)
+        return parts.every(part => shiftCode.includes(part));
+      });
+    })
+
   }
 
   applyValue(value: string) {
-    console.info("applyValue", value)
     this.shiftCode = value;
     this.shiftCodeChange.next(value);
+    this.enterPressed.emit();
   }
 
   onFocus() {
     this.suggestionsOpen = true;
-    this.suggestions = this.shiftCodeService.allShiftCombinations;
+    this.suggestionsSubscription?.unsubscribe();
+    this.suggestionsSubscription = this.shiftCodeService.allShiftCombinations.subscribe(combinations => {
+      this.actualSuggestions = combinations;
+    })
   }
 
   onBlur() {
-    this.applyValue(this.shiftCode)
+    this.suggestionsSubscription?.unsubscribe();
     setTimeout(() => {
+      this.shiftCodeChange.next(this.shiftCode);
       this.suggestionsOpen = false;
     }, 100)
   }

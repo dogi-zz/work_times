@@ -66,8 +66,8 @@ export class InputShiftComponent implements AfterViewInit {
     setTimeout(()=>{
       this.errorString = this.from.error || this.to.error;
       if (!this.errorString){
-        const fromTime = this.from.value[0] + this.from.value[1];
-        const toTime = this.to.value[0] + this.to.value[1];
+        const fromTime = this.from.value[0] + this.from.value[1] / 60;
+        const toTime = this.to.value[0] + this.to.value[1] / 60;
         if (fromTime >= toTime) {
           this.errorString = 'Die "Bis" Zeit muss nach der "Von" Zeit sein';
           return;
