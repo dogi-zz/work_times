@@ -22,7 +22,7 @@ interface DayEntry {
 
     <h1>
       <span>Arbeitszeiten</span>
-      <div class="button" (click)="exportICal()"><span class="material-symbols-outlined">event</span><span class="label">I-Cal</span></div>
+      <div class="button" (click)="exportICal()"><span class="material-symbols-outlined">event</span><span class="label">iCal</span></div>
       <div class="button" (click)="exportPdf()"><span class="material-symbols-outlined">picture_as_pdf</span><span class="label">Drucken</span></div>
       <div class="button" (click)="uploadData()" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">upload</span></div>
       <div class="button" (click)="downloadData()" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">download</span></div>
