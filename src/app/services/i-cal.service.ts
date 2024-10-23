@@ -41,13 +41,16 @@ export class ICalService {
       dayData.forEach(day => {
         day.times.forEach((time, idx) => {
           if (time) {
+            const now = new Date();
             const fromDateString = this.getICalString(new Date(month.year, month.month, day.day, time.from[0], time.from[1], 0, 0));
             const toDateString = this.getICalString(new Date(month.year, month.month, day.day, time.to[0], time.to[1], 0, 0));
+            const createDateString = this.getICalString(now);
 
 
             eventStrings.push([
               'BEGIN:VEVENT',
               `UID:work_times_${month.year}_${month.month}_${day.day}_${idx}_@dogi-zz.github.io`,
+              `DTSTAMP:${createDateString}`,
               `DTSTART:${fromDateString}`,
               `DTEND:${toDateString}`,
               'SUMMARY:Arbeit',

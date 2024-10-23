@@ -236,8 +236,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public exportICal() {
     const months = [
-      getActualMonth(),
-      getNextMonth(),
+      // getActualMonth(),
+      // getNextMonth(),
+      this.month,
     ]
     const exportMonths = months.map(month => {
       const dayData = this.shiftCodeService.getExportData(month);
