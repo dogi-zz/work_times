@@ -3,6 +3,17 @@ export interface Month {
   year: number;
 }
 
+export const getActualMonth = (): Month => {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0)
+  date.setDate(1);
+  date.setMonth(date.getMonth());
+  return {
+    month: date.getMonth(),
+    year: date.getFullYear(),
+  }
+}
+
 export const getNextMonth = (): Month => {
   const date = new Date();
   date.setHours(0, 0, 0, 0)

@@ -1,5 +1,5 @@
 import {Component, ElementRef, OnDestroy, OnInit, QueryList, TemplateRef, ViewChild, ViewChildren} from '@angular/core';
-import {addMonth, getDaysOfMonth, getNextMonth, Month} from '../tools/date.tools';
+import {addMonth, getActualMonth, getDaysOfMonth, getNextMonth, Month} from '../tools/date.tools';
 import {ShiftCodeService} from '../services/shift-code-service';
 import {AppComponent} from '../app.component';
 import {Subscription} from 'rxjs';
@@ -122,7 +122,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.checkEntrySubscription = this.shiftCodeService.allShifts.subscribe(() => {
       this.checkEntries();
     })
-    this.loadSubscription = this.dataService.loadData.subscribe(()=>this.load());
+    this.loadSubscription = this.dataService.loadData.subscribe(() => this.load());
   }
 
   ngOnDestroy() {
@@ -235,9 +235,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public exportICal() {
-    this.iCalService.exportICal(this.month, this.dayEntries.map(d => ({
-      day: d.day,
-      times: d.shifts.map(s => this.shiftCodeService.getShiftTimes(s)),
-    })));
+    const months = [
+      getActualMonth(),
+      getNextMonth(),
+    ]
+    const exportMonths = months.map(month => {
+      const dayData = this.shiftCodeService.getExportData(month);
+      return {month, dayData}
+    })
+
+    this.iCalService.exportICal(exportMonths);
   }
 }

@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject, map, Observable} from 'rxjs';
 import {DataService, ShiftEntry} from './data-service';
 import {splitShift} from '../tools/string-tools';
+import {Month} from '../tools/date.tools';
 
 const pad2 = (num: number) => num < 10 ? `0${num}` : `${num}`;
 
@@ -132,6 +133,16 @@ export class ShiftCodeService {
   deleteShiftCombination(shiftCombination: string) {
     this.allShiftCombinations.next(this.allShiftCombinations.value.filter(s => s !== shiftCombination));
     this.dataService.saveShiftCombinations(this.allShiftCombinations.value)
+  }
+
+  getExportData( month: Month): { day: number, times: { from: [number, number], to: [number, number] }[] }[]{
+    const monthData = this.dataService.getLocalData(month);
+    return monthData.map(dayEntry => {
+      const {shifts, unknown} = this.getShiftCodes(dayEntry.shiftCode)
+      const shiftCodes = [...shifts, ...unknown];
+      const times = shiftCodes.map(s => this.getShiftTimes(s));
+      return {day: dayEntry.day, times}
+    });
   }
 
 }

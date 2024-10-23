@@ -15,14 +15,14 @@ export class ICalService {
   }
 
 
-  public async downloadCalFile(month: Month,iCalCode: string): Promise<any> {
+  public async downloadCalFile( iCalCode: string): Promise<any> {
     console.info(iCalCode)
     const icalFIle = new Blob([iCalCode], {type: 'text/calendar'});
     const url = window.URL.createObjectURL(icalFIle);
 
     const a = document.createElement("a");
     a.href = url;
-    a.setAttribute("download", `${new MonthToStringPipe().transform(month)}.ics`);
+    a.setAttribute("download", `Arbeit.ics`);
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -35,39 +35,42 @@ export class ICalService {
   }
 
 
-  public async exportICal(month: Month, dayData: { day: number, times: { from: [number, number], to: [number, number] }[] }[]): Promise<any> {
+  public async exportICal(exportData: {month: Month, dayData: { day: number, times: { from: [number, number], to: [number, number] }[] }[]}[]): Promise<any> {
     const eventStrings: string[] = [];
-    dayData.forEach(day => {
-      day.times.forEach((time, idx) => {
-        if (time) {
-          const fromDateString = this.getICalString(new Date(month.year, month.month, day.day, time.from[0], time.from[1], 0, 0));
-          const toDateString = this.getICalString(new Date(month.year, month.month, day.day, time.to[0], time.to[1], 0, 0));
+    exportData.forEach(({month, dayData})=>{
+      dayData.forEach(day => {
+        day.times.forEach((time, idx) => {
+          if (time) {
+            const fromDateString = this.getICalString(new Date(month.year, month.month, day.day, time.from[0], time.from[1], 0, 0));
+            const toDateString = this.getICalString(new Date(month.year, month.month, day.day, time.to[0], time.to[1], 0, 0));
 
 
-          eventStrings.push([
-            'BEGIN:VEVENT',
-            `UID:work_times_${month.year}_${month.month}_${day.day}_${idx}_@dogi-zz.github.io`,
-            `DTSTART:${fromDateString}`,
-            `DTEND:${toDateString}`,
-            'SUMMARY:Arbeit',
-            // 'DESCRIPTION:Fortsetzung der Team-Besprechung zu Projekt XY',
-            // 'LOCATION:Büro A',
-            'END:VEVENT',
-          ].join('\n'))
-        }
+            eventStrings.push([
+              'BEGIN:VEVENT',
+              `UID:work_times_${month.year}_${month.month}_${day.day}_${idx}_@dogi-zz.github.io`,
+              `DTSTART:${fromDateString}`,
+              `DTEND:${toDateString}`,
+              'SUMMARY:Arbeit',
+              // 'DESCRIPTION:Fortsetzung der Team-Besprechung zu Projekt XY',
+              // 'LOCATION:Büro A',
+              'END:VEVENT',
+            ].join('\r\n'))
+          }
+        })
       })
     })
 
-    this.downloadCalFile(month, [
+
+    this.downloadCalFile([
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//dogi-zz.github.io.work_times//NONSGML Kalender//DE',
+      'PRODID:-//dogi-zz.github.io.work_times//NONSGML',
       'CALSCALE:GREGORIAN',
 
-      ...eventStrings,
+      eventStrings.join(('\r\n\r\n')),
 
       'END:VCALENDAR',
-    ].join('\n'));
+    ].join('\r\n'));
   }
 
 }
