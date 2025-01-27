@@ -20,14 +20,17 @@ interface DayEntry {
   selector: 'app-home',
   template: `
 
-    <h1>
-      <span>Arbeitszeiten</span>
-      <div class="button" (click)="exportICal()"><span class="material-symbols-outlined">event</span><span class="label">iCal</span></div>
-      <div class="button" (click)="exportPdf()"><span class="material-symbols-outlined">picture_as_pdf</span><span class="label">Drucken</span></div>
-      <div class="button" (click)="uploadData()" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">upload</span></div>
-      <div class="button" (click)="downloadData()" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">download</span></div>
-      <div class="button" (click)="openConfigSettings()"><span class="material-symbols-outlined">settings</span></div>
-    </h1>
+    <div class="header"  [class.burger-menu-open]="burgerMenuOpen"  [class.can-upload-buttons]="dataService.canUpload">
+      <span class="text">Arbeitszeiten</span>
+      <span class="burger-menu material-symbols-outlined"  (click)="burgerMenuOpen = !burgerMenuOpen">menu</span>
+      <div class="buttons">
+        <div class="button" (click)="exportICal()"><span class="material-symbols-outlined">menu</span><span class="label">iCal</span></div>
+        <div class="button" (click)="exportPdf()"><span class="material-symbols-outlined">picture_as_pdf</span><span class="label">Drucken</span></div>
+        <div class="button" (click)="uploadData()" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">upload</span></div>
+        <div class="button" (click)="downloadData()" *ngIf="dataService.canUpload"><span class="material-symbols-outlined">download</span></div>
+        <div class="button" (click)="openConfigSettings()"><span class="material-symbols-outlined">settings</span></div>
+      </div>
+    </div>
     <div class="month-input">
       <div class="button" (click)="addMonth(-1)"><span class="material-symbols-outlined">chevron_left</span></div>
       <div class="text">{{ month|monthToString }}</div>
@@ -36,8 +39,8 @@ interface DayEntry {
 
     <div class="day-time-inputs">
       <div class="day-time-input-line" *ngFor="let day of dayEntries; let idx = index" [class.weekend]="(day.day | dayToString : month : 'weekend')">
-        <div class="week">{{ day.day | dayToString : month : 'week' }}</div>
-        <div class="day">{{ day.day | dayToString : month : 'date' }}</div>
+        <div class="week" (click)="dayInput.doFocus()">{{ day.day | dayToString : month : 'week' }}</div>
+        <div class="day" (click)="dayInput.doFocus()">{{ day.day | dayToString : month : 'date' }}</div>
         <div class="input">
           <app-shift-input #dayInput [(shiftCode)]="day.shiftCode" (shiftCodeChange)="applyValue(day)" (enterPressed)="onEnter(idx)"></app-shift-input>
         </div>
@@ -88,6 +91,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private checkEntrySubscription: Subscription;
   private loadSubscription: Subscription;
+
+  public burgerMenuOpen = false;
 
   constructor(
     private appComponent: AppComponent,
@@ -247,4 +252,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.iCalService.exportICal(exportMonths);
   }
+
+
 }

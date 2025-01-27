@@ -100,13 +100,15 @@ import {Component, ElementRef, TemplateRef, ViewChild} from '@angular/core';
     }
 
     @media all and (max-width: 600px) {
-      .modal-content {
-        min-width: unset;
-        width: 100vw;
-      }
+      .modal {
+        .modal-content {
+          min-width: unset;
+          width: 100vw;
+        }
 
-      .modal.open {
-        align-items: flex-start;
+        .modal.open {
+          align-items: flex-start;
+        }
       }
 
     }

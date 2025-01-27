@@ -8,10 +8,19 @@ import {splitShift} from '../tools/string-tools';
   selector: 'app-shift-input',
   template: `
     <div class="shift-input">
-      <input type="text" #dayInput list="shiftCombinations" [(ngModel)]="shiftCode" (ngModelChange)="filter($event)" (keydown)="onKeyDown($event)" (focus)="onFocus()" (blur)="onBlur()"/>
+      <input type="text" #dayInput list="shiftCombinations"
+             [(ngModel)]="shiftCode"
+             (ngModelChange)="filter($event)"
+             (keydown)="onKeyDown($event)"
+             (focus)="onFocus()"
+             (blur)="onBlur()"/>
       <div class="suggestions" *ngIf="suggestionsOpen && actualSuggestions.length">
-        <div class="suggestion" *ngFor="let suggestion of actualSuggestions; let idx = index;" [class.hover]="suggestionIndex === idx" (click)="applyValue(suggestion)">{{ idx }}{{ suggestion }}</div>
+        <div class="suggestion" *ngFor="let suggestion of actualSuggestions; let idx = index;"
+             [class.hover]="suggestionIndex === idx"
+             (click)="applyValue(suggestion)">{{ suggestion }}
+        </div>
       </div>
+      <span class="material-symbols-outlined" *ngIf="suggestionsOpen" (click)="onBlur()">close</span>
     </div>
   `,
   styles: [
@@ -20,6 +29,12 @@ import {splitShift} from '../tools/string-tools';
 
       .shift-input {
         position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .material-symbols-outlined{
+        color: @color-line-dark-gray;
       }
 
       .suggestions {
@@ -65,6 +80,8 @@ export class ShiftInputComponent implements OnInit, OnChanges, OnDestroy {
   public actualSuggestions: string[] = [];
   public suggestionIndex = -1;
 
+  private blurTimeout: any;
+
   constructor(
     public shiftCodeService: ShiftCodeService,
   ) {
@@ -105,6 +122,7 @@ export class ShiftInputComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   filter($event: string) {
+    console.info("filter", $event)
     this.suggestionIndex = -1;
     this.suggestionsSubscription?.unsubscribe();
     this.suggestionsSubscription = this.shiftCodeService.allShiftCombinations.subscribe(combinations => {
@@ -117,12 +135,19 @@ export class ShiftInputComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   applyValue(value: string) {
+    clearTimeout(this.blurTimeout);
     this.shiftCode = value;
     this.shiftCodeChange.next(value);
-    this.enterPressed.emit();
+    this.doFocus()
+    this.filter(value)
+  }
+
+  doFocus() {
+    this.dayInput.nativeElement.focus()
   }
 
   onFocus() {
+    clearTimeout(this.blurTimeout);
     this.suggestionsOpen = true;
     this.suggestionsSubscription?.unsubscribe();
     this.suggestionsSubscription = this.shiftCodeService.allShiftCombinations.subscribe(combinations => {
@@ -131,8 +156,9 @@ export class ShiftInputComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onBlur() {
-    this.suggestionsSubscription?.unsubscribe();
-    setTimeout(() => {
+    console.info("onBlur");
+    this.blurTimeout = setTimeout(() => {
+      this.suggestionsSubscription?.unsubscribe();
       this.shiftCodeChange.next(this.shiftCode);
       this.suggestionsOpen = false;
     }, 100)

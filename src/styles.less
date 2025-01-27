@@ -13,15 +13,6 @@ h1 {
   padding: 0;
   display: flex;
   gap: 10px;
-  align-items: center;
-
-  span {
-    flex: 1;
-  }
-
-  .button {
-    padding: 10px;
-  }
 }
 
 
@@ -31,12 +22,13 @@ h2 {
   padding: 0;
 }
 
-a, .a{
+a, .a {
   cursor: pointer;
   font-weight: bold;
   color: @color-active;
   text-decoration: none;
-  &:hover, &:visited{
+
+  &:hover, &:visited {
     color: @color-active;
   }
 }
@@ -62,8 +54,98 @@ input[type="number"] {
 }
 
 
+.header-buttons-burger() {
+  .burger-menu {
+    display: unset;
+    flex: 1;
+    text-align: right;
+    margin-right: 20px;
+  }
+  .buttons {
+    display: none;
+    position: fixed;
+    top: 50px;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    background: white;
+    padding: 5px;
+    border: 1px solid @color-line-light-gray;
+    border-radius: 10px;
+
+    .button {
+      // display: none;
+    }
+  }
+  &.burger-menu-open {
+    .buttons {
+      display: flex;
+    }
+  }
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100dvw;
+  height: 55px;
+  padding-top: 10px;
+  box-sizing: border-box;
+  z-index: 1;
+  background: white;
+
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+
+
+  span.text {
+    .typo-h1();
+    margin-left: 20px;
+  }
+
+  .burger-menu {
+    color: @color-active;
+    display: none;
+    align-self: center;
+    font-size: 32px;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+    align-items: center;
+    overflow-x: hidden;
+    flex-wrap: wrap;
+
+    flex: 1;
+
+    .button {
+      padding: 10px;
+    }
+
+  }
+}
+
+
+@media all and (max-width: 510px) {
+  .header {
+    .header-buttons-burger();
+  }
+}
+
+@media all and (max-width: 610px) {
+  .header.can-upload-buttons {
+    .header-buttons-burger();
+  }
+}
+
+
 .month-input {
   margin: 20px;
+  margin-top: 60px;
   color: darken(@color-active, 10%);
 
   display: flex;
@@ -75,7 +157,7 @@ input[type="number"] {
   }
 }
 
-@media all and (max-width: 600px) {
+@media all and (max-width: 500px) {
   .month-input {
     justify-content: center;
   }
@@ -84,13 +166,14 @@ input[type="number"] {
 
 .day-time-inputs {
   margin: 20px;
+  width: calc(100dvw - 40px);
 }
 
 
 .day-time-input-line {
   .typo-regular();
 
-  &.weekend{
+  &.weekend {
     background: @color-line-light-gray;
   }
 
@@ -146,10 +229,42 @@ input[type="number"] {
 
 }
 
+@media all and (max-width: 420px) {
+  .day-time-input-line {
+    display: grid;
+    grid-template-columns: 50px 70px 1fr;
+    grid-template-areas: "W D I" "W D O";
+
+    .week {
+      grid-area: W;
+    }
+
+    .day {
+      grid-area: D;
+    }
+
+    .input {
+      grid-area: I;
+    }
+
+    .output-strings {
+      grid-area: O;
+      margin-left: 0;
+      margin-bottom: 5px;
+    }
+
+    .output-chart {
+      display: none;
+    }
+
+  }
+
+}
+
+
 .error {
   color: red;
 }
-
 
 
 @media print {
